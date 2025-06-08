@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered SWOT Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header .icon {
+            font-size: 3rem;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 40px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #FF5252;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.1);
+        }
+        
+        .input-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #FF5252 0%, #FF1744 100%);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            min-width: 200px;
+        }
+        
+        .analyze-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 82, 82, 0.3);
+        }
+        
+        .analyze-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-section {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loading-section.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #ecf0f1;
+            border-top: 4px solid #FF5252;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.show {
+            display: block;
+        }
+        
+        .company-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #FF5252 0%, #FF1744 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .company-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .company-header .industry {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .swot-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-top: 4px solid;
+            transition: transform 0.3s ease;
+        }
+        
+        .swot-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .swot-card.strengths {
+            border-top-color: #27ae60;
+        }
+        
+        .swot-card.weaknesses {
+            border-top-color: #e74c3c;
+        }
+        
+        .swot-card.opportunities {
+            border-top-color: #3498db;
+        }
+        
+        .swot-card.threats {
+            border-top-color: #f39c12;
+        }
+        
+        .swot-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .swot-card .icon {
+            font-size: 1.5rem;
+        }
+        
+        .swot-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 3px solid;
+        }
+        
+        .strengths .swot-item {
+            border-left-color: #27ae60;
+        }
+        
+        .weaknesses .swot-item {
+            border-left-color: #e74c3c;
+        }
+        
+        .opportunities .swot-item {
+            border-left-color: #3498db;
+        }
+        
+        .threats .swot-item {
+            border-left-color: #f39c12;
+        }
+        
+        .swot-item h4 {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .swot-item p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .insights-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .insights-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        
+        .insights-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #FF5252;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 12px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #FF5252;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .new-analysis-btn {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 40px auto 0;
+            display: block;
+        }
+        
+        .new-analysis-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.3);
+        }
+        
+        .error-section {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: #fff5f5;
+            border-radius: 15px;
+            border: 2px solid #fed7d7;
+            margin: 20px 0;
+        }
+        
+        .error-section.show {
+            display: block;
+        }
+        
+        .error-section h3 {
+            color: #e53e3e;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .error-section p {
+            color: #744210;
+            margin-bottom: 20px;
+        }
+        
+        .retry-btn {
+            background: #FF5252;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .swot-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .insights-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="icon">🎯</span>
+                AI-Powered SWOT Analysis
+            </h1>
+            <p>Get comprehensive strategic insights for any company with AI-driven analysis. Discover strengths, weaknesses, opportunities, and threats in seconds.</p>
+        </div>
+
+        <div class="main-card">
+            <!-- Input Section -->
+            <div class="input-section" id="inputSection">
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="companyName">Company Name *</label>
+                        <input 
+                            type="text" 
+                            id="companyName" 
+                            placeholder="e.g., Apple, Tesla, McDonald's"
+                            maxlength="100"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="industry">Industry (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="industry" 
+                            placeholder="e.g., Technology, Automotive, Food & Beverage"
+                            maxlength="50"
+                        >
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="additionalContext">Additional Context (Optional)</label>
+                        <textarea 
+                            id="additionalContext" 
+                            placeholder="Any specific focus areas, recent developments, or particular aspects you'd like analyzed..."
+                            maxlength="500"
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <button class="analyze-btn" onclick="generateSWOT()">
+                    🔍 Generate SWOT Analysis
+                </button>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="loading-section" id="loadingSection">
+                <div class="spinner"></div>
+                <div class="loading-text">Analyzing company data and generating SWOT insights...</div>
+            </div>
+
+            <!-- Error Section -->
+            <div class="error-section" id="errorSection">
+                <h3>⚠️ Analysis Failed</h3>
+                <p id="errorMessage">We encountered an issue generating your SWOT analysis. Please try again.</p>
+                <button class="retry-btn" onclick="retryAnalysis()">Try Again</button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="company-header">
+                    <h2 id="companyTitle"></h2>
+                    <div class="industry" id="industryTitle"></div>
+                </div>
+
+                <div class="swot-grid">
+                    <div class="swot-card strengths">
+                        <h3><span class="icon">💪</span> Strengths</h3>
+                        <div id="strengthsContent"></div>
+                    </div>
+
+                    <div class="swot-card weaknesses">
+                        <h3><span class="icon">⚠️</span> Weaknesses</h3>
+                        <div id="weaknessesContent"></div>
+                    </div>
+
+                    <div class="swot-card opportunities">
+                        <h3><span class="icon">🚀</span> Opportunities</h3>
+                        <div id="opportunitiesContent"></div>
+                    </div>
+
+                    <div class="swot-card threats">
+                        <h3><span class="icon">⚡</span> Threats</h3>
+                        <div id="threatsContent"></div>
+                    </div>
+                </div>
+
+                <div class="insights-section">
+                    <div class="insights-card">
+                        <h3>💡 Key Strategic Insights</h3>
+                        <ul class="insights-list" id="keyInsights"></ul>
+                    </div>
+
+                    <div class="insights-card">
+                        <h3>📋 Recommendations</h3>
+                        <ul class="insights-list" id="recommendations"></ul>
+                    </div>
+                </div>
+
+                <button class="new-analysis-btn" onclick="startNewAnalysis()">
+                    🔄 New Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://business-tools-api.onrender.com';
+
+        async function generateSWOT() {
+            const companyName = document.getElementById('companyName').value.trim();
+            const industry = document.getElementById('industry').value.trim();
+            const additionalContext = document.getElementById('additionalContext').value.trim();
+
+            // Validation
+            if (!companyName) {
+                alert('Please enter a company name');
+                document.getElementById('companyName').focus();
+                return;
+            }
+
+            // Show loading state
+            showLoading();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/swot`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company: companyName,
+                        industry: industry || undefined,
+                        additionalContext: additionalContext || undefined
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+
+            } catch (error) {
+                console.error('SWOT Analysis Error:', error);
+                showError(error.message);
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('inputSection').style.display = 'none';
+            document.getElementById('errorSection').classList.remove('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('loadingSection').classList.add('show');
+        }
+
+        function showError(message) {
+            document.getElementById('loadingSection').classList.remove('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorSection').classList.add('show');
+        }
+
+        function retryAnalysis() {
+            document.getElementById('errorSection').classList.remove('show');
+            document.getElementById('inputSection').style.display = 'block';
+        }
+
+        function displayResults(data) {
+            document.getElementById('loadingSection').classList.remove('show');
+            
+            // Set company info
+            document.getElementById('companyTitle').textContent = data.company;
+            document.getElementById('industryTitle').textContent = data.industry || 'Industry not specified';
+
+            // Display SWOT categories
+            displaySWOTCategory('strengthsContent', data.analysis.strengths);
+            displaySWOTCategory('weaknessesContent', data.analysis.weaknesses);
+            displaySWOTCategory('opportunitiesContent', data.analysis.opportunities);
+            displaySWOTCategory('threatsContent', data.analysis.threats);
+
+            // Display insights and recommendations
+            displayList('keyInsights', data.keyInsights);
+            displayList('recommendations', data.recommendations);
+
+            document.getElementById('resultsSection').classList.add('show');
+        }
+
+        function displaySWOTCategory(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'swot-item';
+                div.innerHTML = `
+                    <h4>${item.point}</h4>
+                    <p>${item.description}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function displayList(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                container.appendChild(li);
+            });
+        }
+
+        function startNewAnalysis() {
+            // Reset form
+            document.getElementById('companyName').value = '';
+            document.getElementById('industry').value = '';
+            document.getElementById('additionalContext').value = '';
+
+            // Show input section
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('inputSection').style.display = 'block';
+
+            // Focus on company name input
+            document.getElementById('companyName').focus();
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('companyName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    generateSWOT();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
